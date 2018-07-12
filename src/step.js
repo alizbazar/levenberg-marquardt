@@ -1,4 +1,4 @@
-import { inverse, Matrix } from 'ml-matrix';
+import { Matrix } from 'vectorious';
 
 /**
  * Difference of the matrix function over the parameters
@@ -71,7 +71,7 @@ export default function step(
   gradientDifference,
   parameterizedFunction
 ) {
-  var identity = Matrix.eye(params.length).mul(
+  var identity = Matrix.identity(params.length).scale(
     damping * gradientDifference * gradientDifference
   );
 
@@ -88,18 +88,18 @@ export default function step(
     gradientDifference,
     parameterizedFunction
   );
-  var matrixFunc = matrixFunction(data, evaluatedData).transposeView();
-  var inverseMatrix = inverse(
-    identity.add(gradientFunc.mmul(gradientFunc.transposeView()))
-  );
+  var matrixFunc = matrixFunction(data, evaluatedData).transpose();
+  var inverseMatrix = identity.add(gradientFunc.multiply(gradientFunc.transpose())).inverse();
   params = new Matrix([params]);
-  params = params.sub(
-    inverseMatrix
-      .mmul(gradientFunc)
-      .mmul(matrixFunc)
-      .mul(gradientDifference)
-      .transposeView()
-  );
+  const diff = inverseMatrix
+    .multiply(gradientFunc)
+    .multiply(matrixFunc)
+    .scale(gradientDifference)
+    .transpose();
+  params = params.subtract(diff);
 
-  return params.to1DArray();
+  return params.toArray().reduce((acc, arr) => {
+    acc.push(...arr);
+    return acc;
+  }, []);
 }

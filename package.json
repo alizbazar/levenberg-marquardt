@@ -47,6 +47,6 @@
     "rollup": "^0.55.5"
   },
   "dependencies": {
-    "ml-matrix": "^5.0.1"
+    "vectorious": "^4.8.2"
   }
 }
